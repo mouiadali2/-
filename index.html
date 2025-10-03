@@ -11,7 +11,7 @@
       --indigo-600:#4f46e5;--indigo-700:#4338ca;--purple-600:#7c3aed;--emerald-100:#d1fae5;
       --emerald-200:#a7f3d0;--emerald-500:#10b981;--emerald-700:#047857;--red-100:#fee2e2;
       --red-200:#fecaca;--red-500:#ef4444;--red-700:#b91c1c;--gray-600:#4b5563;--gray-700:#374151;
-      --blue-500:#3b82f6;--purple-500:#8b5cf6;--teal-600:#0d9488;--emerald-500:#10b981;
+      --blue-500:#3b82f6;--purple-600:#7c3aed;--teal-600:#0d9488;
     }
     *{box-sizing:border-box}
     body{
@@ -74,7 +74,6 @@
     }
     .alert.ok{background:var(--emerald-100);color:var(--emerald-700)}
     .alert.bad{background:var(--red-100);color:var(--red-700)}
-    .spacer{height:8px}
   </style>
 </head>
 <body>
@@ -84,7 +83,7 @@
     <!-- شاشة تسجيل الدخول -->
     <section id="screen-login" class="stack">
       <h2>أهلاً بك</h2>
-      <p class="muted">أدخل اسمك وبريدك الإلكتروني لبدء التحدي.</p>
+      <p class="muted">أدخل اسمك لبدء التحدي.</p>
       <input id="name" class="input" type="text" placeholder="الاسم" />
       <p id="login-error" class="alert bad hidden"></p>
       <button id="btn-login" class="btn btn-primary">دخول</button>
@@ -128,7 +127,7 @@
   </main>
 
   <script>
-    // 1) الأسئلة
+    // الأسئلة
     const questions = [
       {
         questionText:"فانهلْ من الحبّ المصفّى إنّها*للحبّ نبعٌ خيّرٌ لا ينضُبُ",
@@ -157,22 +156,18 @@
       },
     ];
 
-    // 2) الحالة
+    // الحالة
     let current = 0;
     let score = 0;
     let selected = null;
-    let answeredCorrectly = false;
-    let quizStarted = false;
-    let isLoggedIn = false;
-    let userName = "", 
-    // 3) مراجع DOM
+
+    // مراجع DOM
     const sLogin   = document.getElementById('screen-login');
     const sStart   = document.getElementById('screen-start');
     const sQuiz    = document.getElementById('screen-quiz');
     const sResult  = document.getElementById('screen-result');
 
     const nameInp  = document.getElementById('name');
-
     const loginErr = document.getElementById('login-error');
     const btnLogin = document.getElementById('btn-login');
 
@@ -195,36 +190,35 @@
 
     qTot.textContent = questions.length;
 
-    // 4) تنقل الشاشات
+    // تنقل الشاشات
     function show(el){[sLogin,sStart,sQuiz,sResult].forEach(e=>e.classList.add('hidden'));el.classList.remove('hidden')}
     function startQuiz(){
-      quizStarted = true;
-      current = 0; score = 0; selected = null; answeredCorrectly = false;
+      current = 0; score = 0; selected = null;
       scoreEl.textContent = score;
       renderQuestion();
       show(sQuiz);
     }
 
-    // 5) تسجيل الدخول
+    // تسجيل الدخول بالاسم فقط
     btnLogin.addEventListener('click', () => {
       const n = nameInp.value.trim();
+      if(!n){loginErr.textContent='الرجاء إدخال الاسم.';loginErr.classList.remove('hidden');return}
       loginErr.classList.add('hidden');
-      userName=n; isLoggedIn=true;
-      welcome.textContent=userName;
+      welcome.textContent=n;
       show(sStart);
     });
 
-    // 6) بداية وإعادة
+    // بداية وإعادة
     btnStart.addEventListener('click', startQuiz);
     btnRestart.addEventListener('click', ()=>{show(sStart)});
 
-    // 7) عرض السؤال
+    // عرض السؤال
     function renderQuestion(){
       const q = questions[current];
       qIdx.textContent = current+1;
       qText.textContent = `"${q.questionText}"`;
       optsEl.innerHTML = '';
-      selected = null; answeredCorrectly=false;
+      selected = null;
       fb.classList.add('hidden'); fb.textContent='';
       btnNext.disabled = true;
       nextLabel.textContent = current === questions.length-1 ? 'إنهاء المسابقة' : 'السؤال التالي';
@@ -237,7 +231,6 @@
           if(selected!==null) return;
           selected=opt;
           const ok = opt===q.correctAnswer;
-          answeredCorrectly = ok;
           if(ok){
             b.classList.add('correct');
             score+=1; scoreEl.textContent=score;
@@ -249,7 +242,6 @@
             fb.className='alert bad';
           }
           fb.classList.remove('hidden');
-          // تعطيل باقي الأزرار
           [...optsEl.children].forEach(ch=>{
             if(ch!==b){ch.classList.add('disabled')}
             ch.disabled=true;
@@ -260,7 +252,7 @@
       });
     }
 
-    // 8) التالي
+    // التالي
     btnNext.addEventListener('click',()=>{
       if(selected===null) return;
       const next = current+1;
@@ -268,7 +260,6 @@
         current=next;
         renderQuestion();
       }else{
-        // نتائج
         finalScore.textContent = score;
         finalTotal.textContent = questions.length;
         let msg='';
